@@ -2,6 +2,8 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 export async function POST(request: Request) {
   try {
+    const { env } = getCloudflareContext();
+
     const formData = await request.formData();
 
     const file = formData.get("file");
@@ -13,11 +15,17 @@ export async function POST(request: Request) {
       });
     }
 
+    const storageKey = crypto.randomUUID();
+
+    await env.FILES_BUCKET.put(
+      storageKey,
+      await file.arrayBuffer()
+    );
+
     return Response.json({
       success: true,
-      name: file.name,
-      size: file.size,
-      type: file.type,
+      storageKey,
+      fileName: file.name,
     });
   } catch (error) {
     return Response.json({
