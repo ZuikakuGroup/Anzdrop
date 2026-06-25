@@ -6,26 +6,11 @@ export async function POST(request: Request) {
 
     const formData = await request.formData();
 
-    const file = formData.get("file");
-
-    if (!(file instanceof File)) {
-      return Response.json({
-        success: false,
-        error: "file not found",
-      });
-    }
-
-    const storageKey = crypto.randomUUID();
-
-    await env.FILES_BUCKET.put(
-      storageKey,
-      await file.arrayBuffer()
-    );
+    const files = formData.getAll("files");
 
     return Response.json({
       success: true,
-      storageKey,
-      fileName: file.name,
+      count: files.length,
     });
   } catch (error) {
     return Response.json({
