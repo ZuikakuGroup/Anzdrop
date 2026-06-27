@@ -15,10 +15,29 @@ export async function GET(
 
     const { shareId } = await context.params;
 
+    const share = await env.DB.prepare(
+      `
+      SELECT id, created_at, expires_at
+      FROM shares
+      WHERE id = ?
+    `
+    )
+      .bind(shareId)
+      .first();
+
+    if (!share) {
+      return Response.json(
+        {
+          success: false,
+          error: "Share not found",
+        },
+        { status: 404 }
+      );
+    }
+
     return Response.json({
       success: true,
-      shareId,
-      hasDB: !!env.DB,
+      share,
     });
   } catch (error) {
     return Response.json(
