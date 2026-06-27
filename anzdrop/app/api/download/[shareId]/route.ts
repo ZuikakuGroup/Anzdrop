@@ -6,6 +6,13 @@ type Share = {
   expires_at: string;
 };
 
+type FileRecord = {
+  id: string;
+  share_id: string;
+  storage_key: string;
+  encrypted_file_name: string;
+};
+
 type RouteContext = {
   params: Promise<{
     shareId: string;
@@ -20,7 +27,6 @@ export async function GET(
     const { env } = getCloudflareContext();
 
     const { shareId } = await context.params;
-
     const share = await env.DB.prepare(
       `
         SELECT id, created_at, expires_at
@@ -53,9 +59,24 @@ export async function GET(
       );
     }
 
+    const { results: files } = await env.DB.prepare(
+      `
+        SELECT
+          id,
+          share_id,
+          storage_key,
+          encrypted_file_name
+        FROM files
+        WHERE share_id = ?
+      `
+    )
+      .bind(shareId)
+      .all<FileRecord>();
+
     return Response.json({
       success: true,
       share,
+      files,
     });
   } catch (error) {
     return Response.json(
