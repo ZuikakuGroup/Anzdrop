@@ -1,5 +1,11 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
+type Share = {
+  id: string;
+  created_at: string;
+  expires_at: string;
+};
+
 type RouteContext = {
   params: Promise<{
     shareId: string;
@@ -17,13 +23,13 @@ export async function GET(
 
     const share = await env.DB.prepare(
       `
-      SELECT id, created_at, expires_at
-      FROM shares
-      WHERE id = ?
-    `
+        SELECT id, created_at, expires_at
+        FROM shares
+        WHERE id = ?
+      `
     )
       .bind(shareId)
-      .first();
+      .first<Share>();
 
     if (!share) {
       return Response.json(
@@ -32,6 +38,18 @@ export async function GET(
           error: "Share not found",
         },
         { status: 404 }
+      );
+    }
+
+    const expiresAt = new Date(share.expires_at);
+
+    if (expiresAt <= new Date()) {
+      return Response.json(
+        {
+          success: false,
+          error: "Share has expired",
+        },
+        { status: 410 }
       );
     }
 
