@@ -78,8 +78,18 @@ export default function DownloadPage({
       ) : (
         <ul className="mt-6 list-disc ml-6">
           {files.map((file) => (
-            <li key={file.id}>
-              {file.name}
+            <li
+              key={file.id}
+              className="flex items-center justify-between"
+            >
+              <span>{file.name}</span>
+
+              <a
+                href={`/api/file/${file.id}`}
+                className="rounded bg-blue-600 px-3 py-1 text-white"
+              >
+                ダウンロード
+              </a>
             </li>
           ))}
         </ul>
