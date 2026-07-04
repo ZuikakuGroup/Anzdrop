@@ -1,3 +1,5 @@
+import { uint8ArrayToBase64 } from "./encoding";
+
 // 1チャンクをAES-256-GCMで暗号化する
 export async function encryptChunk(
   chunk: Uint8Array<ArrayBuffer>,
