@@ -1,10 +1,10 @@
 // 1チャンクをAES-256-GCMで暗号化する
 export async function encryptChunk(
-  chunk: Uint8Array,
+  chunk: Uint8Array<ArrayBuffer>,
   key: CryptoKey
 ): Promise<{
-  iv: Uint8Array;
-  ciphertext: Uint8Array;
+  iv: Uint8Array<ArrayBuffer>;
+  ciphertext: Uint8Array<ArrayBuffer>;
 }> {
   const iv = crypto.getRandomValues(new Uint8Array(12));
 
@@ -19,16 +19,16 @@ export async function encryptChunk(
 
   return {
     iv,
-    ciphertext: new Uint8Array(encrypted),
+    ciphertext: new Uint8Array(encrypted)
   };
 }
 
 // 1チャンクをAES-256-GCMで復号する
 export async function decryptChunk(
-  iv: Uint8Array,
-  ciphertext: Uint8Array,
+  iv: Uint8Array<ArrayBuffer>,
+  ciphertext: Uint8Array<ArrayBuffer>,
   key: CryptoKey
-): Promise<Uint8Array> {
+): Promise<Uint8Array<ArrayBuffer>> {
   const decrypted = await crypto.subtle.decrypt(
     {
       name: "AES-GCM",
@@ -43,9 +43,9 @@ export async function decryptChunk(
 
 // IVと暗号文を1つのデータへまとめる
 export function packChunk(
-  iv: Uint8Array,
-  ciphertext: Uint8Array
-): Uint8Array {
+  iv: Uint8Array<ArrayBuffer>,
+  ciphertext: Uint8Array<ArrayBuffer>
+): Uint8Array<ArrayBuffer> {
   const packed = new Uint8Array(iv.length + ciphertext.length);
 
   packed.set(iv, 0);
@@ -58,8 +58,8 @@ export function packChunk(
 export function unpackChunk(
   packed: Uint8Array
 ): {
-  iv: Uint8Array;
-  ciphertext: Uint8Array;
+  iv: Uint8Array<ArrayBuffer>;
+  ciphertext: Uint8Array<ArrayBuffer>;
 } {
   const iv = packed.slice(0, 12);
   const ciphertext = packed.slice(12);

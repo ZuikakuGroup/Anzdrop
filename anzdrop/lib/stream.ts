@@ -1,6 +1,8 @@
 const CHUNK_SIZE = 4 * 1024 * 1024;
 
-export async function* streamFile(file: File) {
+export async function* streamFile(
+  file: File
+): AsyncGenerator<Uint8Array<ArrayBuffer>> {
   const reader = file.stream().getReader();
 
   let buffer = new Uint8Array();
@@ -17,7 +19,9 @@ export async function* streamFile(file: File) {
     let offset = 0;
 
     while (merged.length - offset >= CHUNK_SIZE) {
-      yield merged.slice(offset, offset + CHUNK_SIZE);
+      yield new Uint8Array(
+        merged.slice(offset, offset + CHUNK_SIZE).buffer
+      );
       offset += CHUNK_SIZE;
     }
 
@@ -25,6 +29,6 @@ export async function* streamFile(file: File) {
   }
 
   if (buffer.length > 0) {
-    yield buffer;
+    yield new Uint8Array(buffer.slice().buffer);
   }
 }
