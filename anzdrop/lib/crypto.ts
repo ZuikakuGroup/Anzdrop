@@ -71,3 +71,30 @@ export function unpackChunk(
     ciphertext,
   };
 }
+
+// ファイル名を暗号化する
+export async function encryptText(
+  text: string,
+  key: CryptoKey
+): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+
+  const encrypted = await crypto.subtle.encrypt(
+    {
+      name: "AES-GCM",
+      iv,
+    },
+    key,
+    data
+  );
+
+  const packed = packChunk(
+    iv,
+    new Uint8Array(encrypted)
+  );
+
+  return uint8ArrayToBase64(packed);
+}
