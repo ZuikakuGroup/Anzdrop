@@ -1,4 +1,4 @@
-import { uint8ArrayToBase64 } from "./encoding";
+import { uint8ArrayToBase64, base64ToUint8Array } from "./encoding";
 
 // 1チャンクをAES-256-GCMで暗号化する
 export async function encryptChunk(
@@ -97,4 +97,24 @@ export async function encryptText(
   );
 
   return uint8ArrayToBase64(packed);
+}
+
+// ファイル名を復号する
+export async function decryptText(
+  encryptedText: string,
+  key: CryptoKey
+): Promise<string> {
+  const packed = base64ToUint8Array(encryptedText);
+
+  const { iv, ciphertext } = unpackChunk(packed);
+
+  const decrypted = await decryptChunk(
+    iv,
+    ciphertext,
+    key
+  );
+
+  const decoder = new TextDecoder();
+
+  return decoder.decode(decrypted);
 }
