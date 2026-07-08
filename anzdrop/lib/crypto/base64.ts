@@ -1,6 +1,6 @@
 // ArrayBuffer を Base64URL 文字列へ変換
-export function encodeBase64Url(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
+export function encodeBase64Url(buffer: ArrayBuffer | Uint8Array): string {
+  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
 
   let binary = "";
 
