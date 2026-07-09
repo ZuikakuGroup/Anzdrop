@@ -1,37 +1,47 @@
 import {
   generateKey,
-  exportKey,
-  importKey,
-} from "../../../lib/crypto/key";
-
-import {
-  encodeBase64Url,
-  decodeBase64Url,
-} from "../../../lib/crypto/";
+  encryptChunk,
+  decryptChunk,
+} from "../../../lib/crypto";
 
 export async function GET() {
   try {
     const key = await generateKey();
 
-    const raw = await exportKey(key);
+    const encoder = new TextEncoder();
 
-    const encoded = encodeBase64Url(raw);
+    const decoder = new TextDecoder();
 
-    const decoded = decodeBase64Url(encoded);
+    const original = "Hello Anzdrop!";
 
-    await importKey(decoded);
+    const plaintext = encoder.encode(original);
+
+    const encrypted = await encryptChunk(
+      plaintext.buffer,
+      key
+    );
+
+    const decrypted = await decryptChunk(
+      encrypted.ciphertext,
+      encrypted.iv,
+      key
+    );
+
+    const restored = decoder.decode(decrypted);
 
     return Response.json({
       success: true,
-      rawLength: raw.byteLength,
-      decodedLength: decoded.byteLength,
-      encoded,
+      original,
+      restored,
+      match: original === restored,
     });
 
   } catch (error) {
+
     return Response.json({
       success: false,
       error: String(error),
     });
+
   }
 }

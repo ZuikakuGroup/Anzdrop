@@ -6,5 +6,5 @@ export const IV_LENGTH = 12;
 
 export type EncryptionResult = {
   iv: Uint8Array;
-  ciphertext: Uint8Array;
+  ciphertext: ArrayBuffer;
 };
