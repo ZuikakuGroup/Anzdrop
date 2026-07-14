@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { iterateFileChunks } from "@/lib/crypto";
 
 type UploadResponse = {
   success: boolean;
@@ -56,16 +57,19 @@ export default function UploadForm() {
         throw new Error(result.error ?? "Upload failed");
       }
 
-      if (!result.shareId) {
+      const shareId = result.shareId;
+      if (!shareId) {
         throw new Error("shareId is missing");
       }
 
-      setShareId(result.shareId);
+      setShareId(shareId);
       setError("");
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Unknown error"
-      );
+    } catch (unknownErr: unknown) {
+      const error =
+        unknownErr instanceof Error
+          ? unknownErr
+          : new Error("Unknown error");
+      setError(error.message);
     } finally {
       setIsUploading(false);
     }
