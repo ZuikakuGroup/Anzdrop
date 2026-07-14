@@ -2,6 +2,8 @@ import {
   generateKey,
   encryptChunk,
   decryptChunk,
+  packChunk,
+  unpackChunk,
 } from "../../../lib/crypto";
 
 export async function GET() {
@@ -15,15 +17,18 @@ export async function GET() {
     const original = "Hello Anzdrop!";
 
     const plaintext = encoder.encode(original);
-
     const encrypted = await encryptChunk(
-      plaintext.buffer,
+      plaintext,
       key
     );
 
+    const packed = packChunk(encrypted);
+
+    const unpacked = unpackChunk(packed);
+
     const decrypted = await decryptChunk(
-      encrypted.ciphertext,
-      encrypted.iv,
+      unpacked.ciphertext,
+      unpacked.iv,
       key
     );
 

@@ -3,7 +3,7 @@ import type { EncryptionResult } from "./types";
 
 // 1チャンクをAES-256-GCMで暗号化する
 export async function encryptChunk(
-  plaintext: ArrayBuffer,
+  plaintext: BufferSource,
   key: CryptoKey
 ): Promise<EncryptionResult> {
   const iv = generateIV();
