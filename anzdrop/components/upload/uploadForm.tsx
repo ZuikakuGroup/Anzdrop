@@ -44,41 +44,6 @@ export default function UploadForm() {
     setError("");
     setIsUploading(true);
 
-    // == 一時テスト ==
-
-    const key = await generateKey();
-
-    for (const file of files) {
-      console.log(`=== ${file.name} ===`);
-
-      let total = 0;
-      let index = 1;
-
-      for await (const chunk of iterateFileChunks(file)) {
-        total += chunk.byteLength;
-
-        const encrypted = await encryptChunk(chunk, key);
-        const packet = packChunk(encrypted);
-
-        console.log(
-          `Chunk ${index}: plain=${chunk.byteLength}, encrypted=${packet.byteLength}`
-        );
-
-        index++;
-      }
-
-      console.log({
-        fileSize: file.size,
-        total,
-        match: total === file.size,
-      });
-    }
-
-    setIsUploading(false);
-    return;
-
-    // == ここまで ==
-
     try {
       const formData = new FormData();
 
