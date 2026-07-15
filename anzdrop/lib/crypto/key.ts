@@ -33,8 +33,9 @@ export async function importKey(raw: ArrayBuffer): Promise<CryptoKey> {
 }
 
 // AES-GCM用IVを生成する
-export function generateIV(): Uint8Array {
-  return crypto.getRandomValues(
-    new Uint8Array(IV_LENGTH)
-  );
+export function generateIV(): Uint8Array<ArrayBuffer> {
+  const iv = new Uint8Array(IV_LENGTH);
+  crypto.getRandomValues(iv);
+
+  return iv;
 }
