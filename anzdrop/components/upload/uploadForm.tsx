@@ -1,12 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  iterateFileChunks,
-  generateKey,
-  encryptChunk,
-  packChunk,
-} from "@/lib/crypto";
+import { generateKey, iterateEncryptedChunks } from "@/lib/crypto";
 
 type UploadResponse = {
   success: boolean;
@@ -45,6 +40,7 @@ export default function UploadForm() {
     setIsUploading(true);
 
     try {
+
       const formData = new FormData();
 
       files.forEach((file) => {
