@@ -64,6 +64,42 @@ export default function UploadForm() {
         );
       }
 
+      const uploadSessionId = result.uploadSessionId;
+
+      if (!uploadSessionId) {
+        throw new Error("uploadSessionId is missing");
+      }
+
+      const key = await generateKey();
+
+      let partNumber = 1;
+
+      for await (const chunk of iterateEncryptedChunks(file, key)) {
+        console.log(
+          `Uploading part ${partNumber}: ${chunk.byteLength} bytes`
+        );
+
+        const body = chunk.buffer.slice(
+          chunk.byteOffset,
+          chunk.byteOffset + chunk.byteLength
+        ) as ArrayBuffer;
+
+        const chunkResponse = await fetch("/api/upload/chunk", {
+          method: "POST",
+          headers: {
+            "Anzdrop-Upload-Session": uploadSessionId,
+            "Anzdrop-Part-Number": String(partNumber),
+          },
+          body,
+        });
+
+        if (!chunkResponse.ok) {
+          throw new Error(`Chunk ${partNumber} upload failed`);
+        }
+
+        partNumber++;
+      }
+
       setShareId(result.shareId ?? "");
     } catch (unknownErr) {
       const error =
