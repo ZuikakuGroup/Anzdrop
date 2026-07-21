@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { generateKey, iterateEncryptedChunks } from "@/lib/crypto";
 
-type UploadResponse = {
+type UploadStartResponse = {
   success: boolean;
   shareId?: string;
+  uploadSessionId?: string;
   error?: string;
 };
 
@@ -40,41 +41,43 @@ export default function UploadForm() {
     setIsUploading(true);
 
     try {
+      const file = files[0];
 
-      const formData = new FormData();
-
-      files.forEach((file) => {
-        formData.append("files", file);
-      });
-
-      const response = await fetch("/api/upload", {
+      const response = await fetch("/api/upload/start", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          encryptedFileName: file.name,
+        }),
       });
 
-      const result: UploadResponse = await response.json();
+      const result =
+        (await response.json()) as UploadStartResponse;
+
+      console.log(result);
 
       if (!response.ok) {
-        throw new Error(result.error ?? "Upload failed");
+        throw new Error(
+          result.error ?? "Upload start failed"
+        );
       }
 
-      const shareId = result.shareId;
-      if (!shareId) {
-        throw new Error("shareId is missing");
-      }
-
-      setShareId(shareId);
-      setError("");
-    } catch (unknownErr: unknown) {
+      setShareId(result.shareId ?? "");
+    } catch (unknownErr) {
       const error =
         unknownErr instanceof Error
           ? unknownErr
           : new Error("Unknown error");
+
       setError(error.message);
     } finally {
       setIsUploading(false);
     }
   };
+
+
 
   return (
     <div className="max-w-2xl mx-auto p-8">

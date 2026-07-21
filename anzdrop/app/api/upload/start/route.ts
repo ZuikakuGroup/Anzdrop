@@ -1,5 +1,9 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
+type UploadStartRequest = {
+  encryptedFileName: string;
+};
+
 type UploadStartResponse =
   | {
       success: true;
@@ -11,9 +15,29 @@ type UploadStartResponse =
       error: string;
     };
 
-export async function POST(): Promise<Response> {
+export async function POST(
+  request: Request
+): Promise<Response> {
   try {
     const { env } = getCloudflareContext();
+
+    // リクエスト取得
+    const requestBody =
+      (await request.json()) as UploadStartRequest;
+
+    const { encryptedFileName } = requestBody;
+
+    if (!encryptedFileName) {
+      return Response.json(
+        {
+          success: false,
+          error: "Missing encryptedFileName",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
     const shareId = crypto.randomUUID();
     const uploadSessionId = crypto.randomUUID();
@@ -54,35 +78,37 @@ export async function POST(): Promise<Response> {
         share_id,
         storage_key,
         upload_id,
+        encrypted_file_name,
         created_at
       )
-      VALUES (?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?)
     `)
       .bind(
         uploadSessionId,
         shareId,
         storageKey,
         multipart.uploadId,
+        encryptedFileName,
         createdAt
       )
       .run();
 
-    const body: UploadStartResponse = {
+    const responseBody: UploadStartResponse = {
       success: true,
       shareId,
       uploadSessionId,
     };
 
-    return Response.json(body);
+    return Response.json(responseBody);
 
   } catch (error) {
 
-    const body: UploadStartResponse = {
+    const responseBody: UploadStartResponse = {
       success: false,
       error: String(error),
     };
 
-    return Response.json(body, {
+    return Response.json(responseBody, {
       status: 500,
     });
   }
